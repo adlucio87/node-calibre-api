@@ -46,12 +46,15 @@ module.exports.ebookConvertBasicAuth = function (req, res) {
     const login = strauth.substring(0, splitIndex)
     const password = strauth.substring(splitIndex + 1)
 
+    const userSecret = "MyPrivateUser";
+    const passwordSecret = "MyPrivatePassword";
+	  
     //function to validate credentials using https://www.npmjs.com/package/tsscmp
     //Prevents timing attacks using Brad Hill's Double HMAC pattern to perform secure string comparison
     function check (name, pass) {
       //var valid = true
 
-      return (name == 'sendtokindleapp_auth' && pass == '123sdkljfhsdkjfhsdkjhfsfkdjhf!!')
+      return (name == userSecret && pass == passwordSecret)
       
       // Simple method to prevent short-circut and use timing-safe compare
       //valid = compare(name, 'sendtokindleapp_auth') && valid
