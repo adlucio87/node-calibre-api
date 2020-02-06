@@ -28,9 +28,7 @@ gcloud beta run deploy --image gcr.io/sendtokindle-cb739/calibre --platform mana
 https://raw.githubusercontent.com/kovidgoyal/calibre/master/setup/linux-installer.py
 
 
-Step 3/16 : RUN sudo -v && wget -nv -O- https://raw.githubusercontent.com/kovidgoyal/calibre/master/setup/linux-installer.py | sudo python -c "import sys; main=lambda:sys.stderr.write('Download failed\n'); exec(sys.stdin.read()); main()"
- ---> Running in 16797f748e54
-/bin/sh: 1: sudo: not found
-The command '/bin/sh -c sudo -v && wget -nv -O- https://raw.githubusercontent.com/kovidgoyal/calibre/master/setup/linux-installer.py | sudo python -c "import sys; main=lambda:sys.stderr.write('Download failed\n'); exec(sys.stdin.read()); main()"' returned a non-zero code: 127
-ERROR
-ERROR: build step 0 "gcr.io/cloud-builders/docker" failed: step exited with non-zero status: 127
+
+  "error": "Error while converting file",
+    "trace": "Traceback (most recent call last):\n  File \"site.py\", line 77, in main\n  File \"site-packages/calibre/ebooks/conversion/cli.py\", line 401, in main\n  File \"site-packages/calibre/ebooks/conversion/plumber.py\", line 1110, in run\n  File \"site-packages/calibre/customize/conversion.py\", line 246, in __call__\n  File \"site-packages/calibre/ebooks/conversion/plugins/pdf_input.py\", line 54, in convert\n  File \"site-packages/calibre/ebooks/pdf/pdftohtml.py\", line 90, in pdftohtml\nConversionError: pdftohtml failed with return code: 127\n/opt/calibre/bin/pdftohtml: error while loading shared libraries: libnss3.so: cannot open shared object file: No such file or directory\n"
+}
