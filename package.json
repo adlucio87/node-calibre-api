@@ -1,7 +1,7 @@
 {
   "name": "node-calibre-api",
   "version": "0.0.1",
-  "author": "denouche",
+  "author": "lucio",
   "dependencies": {
     "body-parser": "^1.16.0",
     "debug": "^2.6.0",
