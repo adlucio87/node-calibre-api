@@ -1,4 +1,5 @@
-FROM ubuntu:14.04.2
+#FROM ubuntu:14.04.2
+FROM ubuntu:18.04
 
 # Install calibre deps and then nodejs deps
 RUN apt-get update \
@@ -16,12 +17,21 @@ RUN apt-get update \
         git-core \
     && apt-get clean
 
+#RUN apt-get update && \
+#      apt-get -y install sudo
+#RUN useradd -m docker && echo "docker:docker" | chpasswd && adduser docker sudo
+#USER docker
+#CMD /bin/bash
+
+
 # Install calibre
-RUN sudo -v && wget -nv -O- https://raw.githubusercontent.com/kovidgoyal/calibre/master/setup/linux-installer.py | sudo python -c "import sys; main=lambda:sys.stderr.write('Download failed\n'); exec(sys.stdin.read()); main()"
+#RUN sudo -v && wget -nv -O- https://raw.githubusercontent.com/kovidgoyal/calibre/master/setup/linux-installer.py | sudo python -c "import sys; main=lambda:sys.stderr.write('Download failed\n'); exec(sys.stdin.read()); main()"
+RUN wget -nv -O- https://raw.githubusercontent.com/kovidgoyal/calibre/master/setup/linux-installer.py |  python -c "import sys; main=lambda:sys.stderr.write('Download failed\n'); exec(sys.stdin.read()); main()"
 
 # Install nodejs
 ENV USER nodejs
-ENV NODE_VERSION 6.9.5
+#ENV NODE_VERSION 6.9.5
+ENV NODE_VERSION 12.15.0
 
 RUN useradd --create-home --shell /bin/bash $USER
 
