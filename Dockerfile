@@ -10,6 +10,7 @@ RUN apt-get update \
         xz-utils \
         imagemagick \
         xdg-utils \
+        libnss3 \
     && apt-get install -y \
         build-essential \
         curl \
