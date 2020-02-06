@@ -9,7 +9,7 @@ Usage
 
 Run the application by building the image and running it:
 ```bash
-docker run --restart always -d --name calibre -p 3000:3000 denouche/node-calibre-api
+docker run --restart always -d --name calibre -p 3000:3000 adlucio87/node-calibre-api
 ```
 
 Or by building the image using the Dockerfile.
@@ -23,4 +23,3 @@ curl -O -J -L -s \
     --form 'to=mobi' \
     'http://localhost:3000/calibre/ebook-convert'
 ```
-
