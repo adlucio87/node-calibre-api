@@ -3,7 +3,7 @@
 var multiparty = require('multiparty'),
     path = require('path'),
     CalibreService = require('../services/calibre'),
-    debug = require('debug')('calibre-api:controller');
+    debug = require('debug')('calibre-api:controller'),
     compare = require('tsscmp');
 
 var conversionTimeout = 10 * 60 * 1000;
