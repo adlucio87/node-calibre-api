@@ -18,12 +18,6 @@ RUN apt-get update \
         git-core \
     && apt-get clean
 
-#RUN apt-get update && \
-#      apt-get -y install sudo
-#RUN useradd -m docker && echo "docker:docker" | chpasswd && adduser docker sudo
-#USER docker
-#CMD /bin/bash
-
 
 # Install calibre
 #RUN sudo -v && wget -nv -O- https://raw.githubusercontent.com/kovidgoyal/calibre/master/setup/linux-installer.py | sudo python -c "import sys; main=lambda:sys.stderr.write('Download failed\n'); exec(sys.stdin.read()); main()"
@@ -46,14 +40,22 @@ RUN cd \
 
 ENV PATH $PATH:/home/$USER/tools/node-v$NODE_VERSION-linux-x64/bin
 
-# Get project
-    #&& git remote add origin https://github.com/denouche/node-calibre-api.git
+# Get project from github repo
+# Old repo git remote add origin https://github.com/denouche/node-calibre-api.git
 ENV PROJECT_DIRECTORY node-calibre-api
 RUN cd \
     && mkdir -p www/$PROJECT_DIRECTORY/ \
     && cd www/$PROJECT_DIRECTORY \
     && git init \
     && git remote add origin https://github.com/adlucio87/node-calibre-api.git
+
+#or get the project from local folder
+#COPY / /www/$PROJECT_DIRECTORY/
+
+#for using remote config for setting and password
+#need to install java and jarn.. to match
+#https://github.com/firebase/firebase-js-sdk#readme
+
 
 # set env
 ENV NODE_ENV production
@@ -64,6 +66,8 @@ EXPOSE 3000
 WORKDIR /home/$USER/www/$PROJECT_DIRECTORY
 
 # update project at every container start
+# i need to check tring commit to git and call container 
+# if works this is great it will rebuild automaticallY
 CMD git pull origin master && npm install && npm start
 
 #RUN --restart always -d --name calibre -p 3000:3000 adlucio87/node-calibre-api
