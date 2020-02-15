@@ -24,8 +24,12 @@ curl -O -J -L -s \
     'http://localhost:3000/calibre/ebook-convert'
 ```
 make build to google cloud
+```
 gcloud builds submit --tag gcr.io/sendtokindle-cb739/calibre
+```
 deploy it on google cloud
+```
 gcloud beta run deploy --image gcr.io/sendtokindle-cb739/calibre --platform managed
 calibre project data
+```
 https://raw.githubusercontent.com/kovidgoyal/calibre/master/setup/linux-installer.py
