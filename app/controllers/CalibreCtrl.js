@@ -29,11 +29,12 @@ module.exports.ebookConvertBasicAuth = function (req, res) {
     //function to validate credentials using https://www.npmjs.com/package/tsscmp
     //Prevents timing attacks using Brad Hill's Double HMAC pattern to perform secure string comparison
     function check (name, pass) {
-      //return (name == userSecret && pass == passwordSecret)
+        var valid = true
+        //return (name == userSecret && pass == passwordSecret)
 
-      // Simple method to prevent short-circut and use timing-safe compare
-      valid = compare(name, userSecret) && valid
-      valid = compare(pass, passwordSecret) && valid
+        // Simple method to prevent short-circut and use timing-safe compare
+        valid = compare(name, userSecret) && valid
+        valid = compare(pass, passwordSecret) && valid
 
       return valid
     }
