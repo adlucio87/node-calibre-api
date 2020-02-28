@@ -21,7 +21,7 @@ module.exports.ebookConvertBasicAuth = function (req, res) {
     const login = strauth.substring(0, splitIndex)
     const password = strauth.substring(splitIndex + 1)
 
-    //TODO: use firebase remote config credetian instead
+    //TODO: use firebase remote config credetial instead
     const userSecret = "sendtokindleapp_auth";
     const passwordSecret = "123sdkljfhsdkjfhsdkjhfsfkdjhf!!";
       

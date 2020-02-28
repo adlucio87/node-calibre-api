@@ -1,6 +1,5 @@
 var exec = require('child_process').exec,
     logger = require('util'),
-    request = require('request'),
     debug = require('debug')('calibre-api:service');
 
 function executeCommand (command) {

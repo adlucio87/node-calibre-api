@@ -15,7 +15,7 @@ RUN apt-get update \
         build-essential \
         curl \
     && apt-get install -y \
-        git-core \
+      #  git-core \
     && apt-get clean
 
 
@@ -43,14 +43,16 @@ ENV PATH $PATH:/home/$USER/tools/node-v$NODE_VERSION-linux-x64/bin
 # Get project from github repo
 # Old repo git remote add origin https://github.com/denouche/node-calibre-api.git
 ENV PROJECT_DIRECTORY node-calibre-api
-RUN cd \
-    && mkdir -p www/$PROJECT_DIRECTORY/ \
-    && cd www/$PROJECT_DIRECTORY \
-    && git init \
-    && git remote add origin https://github.com/adlucio87/node-calibre-api.git
+#RUN cd \
+#    && mkdir -p www/$PROJECT_DIRECTORY/ \
+#    && cd www/$PROJECT_DIRECTORY \
+#    && git init \
+#    && git remote add origin https://github.com/adlucio87/node-calibre-api.git
 
 #or get the project from local folder
-#COPY / /www/$PROJECT_DIRECTORY/
+RUN cd \ 
+    && mkdir -p www/$PROJECT_DIRECTORY/ \
+    && COPY / /www/$PROJECT_DIRECTORY/
 
 #for using remote config for setting and password
 #need to install java and jarn.. to match
@@ -66,8 +68,7 @@ EXPOSE 3000
 WORKDIR /home/$USER/www/$PROJECT_DIRECTORY
 
 # update project at every container start
-# i need to check tring commit to git and call container 
-# if works this is great it will rebuild automaticallY
-CMD git pull origin master && npm install && npm start
+#CMD git pull origin master && npm install && npm start
+CMD npm install && npm start
 
 #RUN --restart always -d --name calibre -p 3000:3000 adlucio87/node-calibre-api
