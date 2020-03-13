@@ -30,6 +30,7 @@ gcloud builds submit --tag gcr.io/sendtokindle-cb739/calibre
 deploy it on google cloud
 ```
 gcloud beta run deploy --image gcr.io/sendtokindle-cb739/calibre --platform managed
+gcloud beta run deploy --image gcr.io/sendtokindle-cb739/ebook-converter --platform managed
 calibre project data
 ```
 https://raw.githubusercontent.com/kovidgoyal/calibre/master/setup/linux-installer.py

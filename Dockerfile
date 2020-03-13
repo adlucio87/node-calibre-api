@@ -50,9 +50,9 @@ ENV PROJECT_DIRECTORY node-calibre-api
 #    && git remote add origin https://github.com/adlucio87/node-calibre-api.git
 
 #or get the project from local folder
-RUN cd \ 
-    && mkdir -p www/$PROJECT_DIRECTORY/ \
-    && COPY / /www/$PROJECT_DIRECTORY/
+RUN mkdir -p /home/$USER/www/$PROJECT_DIRECTORY/
+
+COPY . /home/$USER/www/$PROJECT_DIRECTORY/
 
 #for using remote config for setting and password
 #need to install java and jarn.. to match
