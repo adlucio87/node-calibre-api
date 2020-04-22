@@ -4,7 +4,8 @@ var multiparty = require('multiparty'),
     path = require('path'),
     CalibreService = require('../services/calibre'),
     debug = require('debug')('calibre-api:controller'),
-    compare = require('tsscmp');
+    compare = require('tsscmp'),
+    mime = require('mime-types');
 
 var conversionTimeout = 10 * 60 * 1000;
 
@@ -59,15 +60,25 @@ function conert(req, res){
             return;
         }
         if(!files.file || files.file.length !== 1) {
-            res.status(400).send({error: 'Error: Missing file to convert in the form data'});
+            res.status(401).send({error: 'Error: Missing file to convert in the form data'});
             return;
         }
 
         var toFormat = fields.to[0];
-
-        var fileToConvert = files.file[0],
-            newFilename = path.basename(fileToConvert.originalFilename, path.extname(fileToConvert.originalFilename)) + '.' + toFormat,
-            newFilePath = fileToConvert.path.substring(0, fileToConvert.path.length - path.extname(fileToConvert.path).length) + '.' + toFormat;
+        //var fromFormat = fields.from[0];
+        var fileToConvert = files.file[0];
+        
+        var ext = path.extname(fileToConvert.originalFilename);
+        ext = (ext == "") ? mime.extension(mime.lookup(fileToConvert)) : ext;
+        
+        if (ext == "") {
+            res.status(402).send({error: 'Error: Missing extension'});
+            return;
+        }
+        
+        //potrebbe essere utile utilizzare un nome variabile
+        var newFilename = path.basename(fileToConvert.originalFilename, ext) + '.' + toFormat,
+        newFilePath = fileToConvert.path.substring(0, fileToConvert.path.length - ext.length) + '.' + toFormat;
 
         CalibreService.ebookConvert(fileToConvert.path, newFilePath)
             .then(function(){
