@@ -2,6 +2,10 @@ var exec = require('child_process').exec,
     logger = require('util'),
     debug = require('debug')('calibre-api:service');
 
+    var LanguageDetect = require('languagedetect');
+    var checkWord = require('check-word'),
+
+
 function executeCommand (command) {
     return new Promise(function(resolve, reject) {
         debug("will execute", command);
@@ -25,9 +29,16 @@ function ebookConvert (path, pathTo) {
 }
 exports.ebookConvert = ebookConvert;
 
-function changeTitle (path, title) {
 
-    var a = executeCommand('ebook-meta' + path);
+function changeTitle (path, title) {
+    executeCommand('ebook-meta' + path + ' -t ' + title );
+}
+exports.changeTitle = changeTitle;
+
+
+function IsValidTitle (path, title) {
+
+    var a = executeCommand('ebook-meta' + path + title);
     var actualTitle = "";
     var lines = $(a).val().split('\n');
     for(var i = 0;i < lines.length;i++){
@@ -38,14 +49,30 @@ function changeTitle (path, title) {
             break;
         }
     }
-    
-    if(actualTitle=="")
+
+    if(actualTitle == null || actualTitle=="" )
     {
-        executeCommand('ebook-meta' + path + ' -t ' + title );
+        return false;
     }
+
+    const lngDetector = new LanguageDetect();
+    lngDetector.setLanguageType("iso2");
+    lang = lngDetector.detect(actualTitle)
+    if( lang == null || lang[0] == "")
+    {
+        return false;
+    }
+    checker = checkWord(lang);
+
+    var words = actualTitle.split(" ");    
+    
+    words.forEach(word => {
+        if(checker.check(word) == true)
+        {
+            return true;
+        }
+    });
+
+    return false;
 }
-
-exports.changeTitle = changeTitle;
-
-
-
+exports.IsValidTitle = IsValidTitle;

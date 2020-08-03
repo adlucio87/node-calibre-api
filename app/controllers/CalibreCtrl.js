@@ -85,7 +85,11 @@ function conert(req, res){
                 debug('did it!, the epub exists!')
                 //potrei cambiare il titolo con il file name se vuoto
                 //valutare se c'è una possibilità migliore
-                //CalibreService.changeTitle(newFilePath, newFilename);                   
+                //CalibreService.changeTitle(newFilePath, newFilename);
+                if( !CalibreService.IsValidTitle(newFilePath, newFilename) )
+                {
+                    CalibreService.changeTitle(newFilePath, newFilename);
+                }
                 res.download(newFilePath, newFilename);
             }, function(err) {
                 res.status(500).send({error: 'Error while converting file', trace: err});
