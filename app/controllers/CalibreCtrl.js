@@ -10,7 +10,7 @@ var multiparty = require('multiparty'),
 var conversionTimeout = 10 * 60 * 1000;
 
 module.exports.ebookConvert = function (req, res) {
-    conert(req, res);
+    convert(req, res);
 };
 
 module.exports.ebookConvertBasicAuth = function (req, res) {
@@ -47,11 +47,11 @@ module.exports.ebookConvertBasicAuth = function (req, res) {
     }
     ///////////////////////////////////////////////////////////////////////////
 
-    conert(req, res);
+    convert(req, res);
 };
 
 
-function conert(req, res){
+function convert(req, res){
     res.setTimeout(conversionTimeout);
     var form = new multiparty.Form();
     form.parse(req, function(err, fields, files) {
@@ -80,7 +80,11 @@ function conert(req, res){
         var newFilename = path.basename(fileToConvert.originalFilename, ext) + '.' + toFormat,
         newFilePath = fileToConvert.path.substring(0, fileToConvert.path.length - ext.length) + '.' + toFormat;
 
-        CalibreService.ebookConvert(fileToConvert.path, newFilePath)
+
+        const fsize = fi.files.item(i).size; 
+        const fsizemb = Math.round((fsize / 1024)); 
+
+        CalibreService.ebookConvert(fileToConvert.path, newFilePath, fsizemb)
             .then(function(){
                 debug('did it!, the epub exists!')
                 //potrei cambiare il titolo con il file name se vuoto

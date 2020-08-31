@@ -24,8 +24,15 @@ function executeCommand (command) {
     });
 }
 
-function ebookConvert (path, pathTo) {
-    return executeCommand('ebook-convert ' + path + ' ' + pathTo);
+function ebookConvert (path, pathTo, fsizemb) {
+    //se file size > di 24 allora faccio lo shrink delle immagini
+    if (fsizemb > 24000)
+    {
+        return executeCommand('ebook-convert ' + path + ' ' + pathTo + ' --compress-images');
+    }
+    else{
+        return executeCommand('ebook-convert ' + path + ' ' + pathTo);
+    }
 }
 exports.ebookConvert = ebookConvert;
 
