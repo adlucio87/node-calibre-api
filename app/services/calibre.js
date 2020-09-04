@@ -26,8 +26,10 @@ function executeCommand (command) {
 
 function ebookConvert (path, pathTo, fsizemb) {
     //se file size > di 24 allora faccio lo shrink delle immagini
+    console.log("file size is " + fsizemb + " mb");
     if (fsizemb > 24000)
     {
+        console.log("conversion with compression");
         return executeCommand('ebook-convert ' + path + ' ' + pathTo + ' --compress-images');
     }
     else{
@@ -42,7 +44,6 @@ function changeTitle (path, title) {
 }
 exports.changeTitle = changeTitle;
 
-
 function IsValidTitle (path, title) {
 
     var a = executeCommand('ebook-meta' + path + title);
@@ -56,12 +57,11 @@ function IsValidTitle (path, title) {
             break;
         }
     }
-
     if(actualTitle == null || actualTitle=="" )
     {
         return false;
     }
-
+    console.log("inside title is: " + actualTitle);
     const lngDetector = new LanguageDetect();
     lngDetector.setLanguageType("iso2");
     lang = lngDetector.detect(actualTitle)
@@ -69,17 +69,16 @@ function IsValidTitle (path, title) {
     {
         return false;
     }
+    console.log("detect lang: " + lang);
     checker = checkWord(lang);
-
     var words = actualTitle.split(" ");    
-    
     words.forEach(word => {
         if(checker.check(word) == true)
         {
+            console.log("detect word: " + word);
             return true;
         }
     });
-
     return false;
 }
 exports.IsValidTitle = IsValidTitle;
