@@ -6,6 +6,7 @@ var multiparty = require('multiparty'),
     debug = require('debug')('calibre-api:controller'),
     compare = require('tsscmp'),
     mime = require('mime-types');
+    //fs = require("fs"); //Load the filesystem module
 
 var conversionTimeout = 10 * 60 * 1000;
 
@@ -77,24 +78,28 @@ function convert(req, res){
         }
         
         //potrebbe essere utile utilizzare un nome variabile
-        var newFilename = path.basename(fileToConvert.originalFilename, ext) + '.' + toFormat,
-        newFilePath = fileToConvert.path.substring(0, fileToConvert.path.length - ext.length) + '.' + toFormat;
+        var newFilename = path.basename(fileToConvert.originalFilename, ext),
+        outFile = fileToConvert.path.substring(0, fileToConvert.path.length - ext.length) + '.' + toFormat;
 
+        
+        //var stats = fs.statSync(fileToConvert.path);
+        //var fileSizeInBytes = stats["size"];
+        var fsizemb = fileToConvert.size / 1000000.0;
 
-        const fsize = fi.files.item(i).size; 
-        const fsizemb = Math.round((fsize / 1024)); 
-
-        CalibreService.ebookConvert(fileToConvert.path, newFilePath, fsizemb)
+        CalibreService.ebookConvert(fileToConvert.path, outFile, fsizemb)
             .then(function(){
                 debug('did it!, the epub exists!')
+                
                 //potrei cambiare il titolo con il file name se vuoto
                 //valutare se c'è una possibilità migliore
-                //CalibreService.changeTitle(newFilePath, newFilename);
-                if( !CalibreService.IsValidTitle(newFilePath, newFilename) )
+                if( !CalibreService.IsValidTitle(outFile) )
                 {
-                    CalibreService.changeTitle(newFilePath, newFilename);
+                    debug('Title is not valid')
+                    CalibreService.changeTitle(outFile, newFilename);
+                    debug('Title is changed')
                 }
-                res.download(newFilePath, newFilename);
+                debug('Can Download')
+                res.download(outFile, newFilename+ '.' + toFormat);
             }, function(err) {
                 res.status(500).send({error: 'Error while converting file', trace: err});
             });

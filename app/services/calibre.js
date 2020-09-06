@@ -1,12 +1,9 @@
 var exec = require('child_process').exec,
-    logger = require('util'),
-    debug = require('debug')('calibre-api:service');
+    debug = require('debug')('calibre-api:service'),
+    LanguageDetect = require('languagedetect'),
+    checkWord = require('check-word');
 
-    var LanguageDetect = require('languagedetect');
-    var checkWord = require('check-word'),
-
-
-function executeCommand (command) {
+const executeCommand = function execute (command) {
     return new Promise(function(resolve, reject) {
         debug("will execute", command);
         var child = exec(command, function (error, stdout, stderr) {
@@ -26,10 +23,10 @@ function executeCommand (command) {
 
 function ebookConvert (path, pathTo, fsizemb) {
     //se file size > di 24 allora faccio lo shrink delle immagini
-    console.log("file size is " + fsizemb + " mb");
-    if (fsizemb > 24000)
+    debug("file size is " + fsizemb + " mb");
+    if (fsizemb > 24)
     {
-        console.log("conversion with compression");
+        debug("conversion with compression");
         return executeCommand('ebook-convert ' + path + ' ' + pathTo + ' --compress-images');
     }
     else{
@@ -40,28 +37,33 @@ exports.ebookConvert = ebookConvert;
 
 
 function changeTitle (path, title) {
-    executeCommand('ebook-meta' + path + ' -t ' + title );
+    executeCommand('ebook-meta ' + path + ' --title ' + title );
 }
 exports.changeTitle = changeTitle;
 
-function IsValidTitle (path, title) {
+function IsValidTitle (path) {
 
-    var a = executeCommand('ebook-meta' + path + title);
+    var res = executeCommand('ebook-meta ' + path);
     var actualTitle = "";
-    var lines = $(a).val().split('\n');
-    for(var i = 0;i < lines.length;i++){
-        //code here using lines[i] which will give you each line
-        if(lines[i].startsWith("Title"))
+    var i = 0;
+    while (i < res.length)
+    {
+        var j = res.indexOf("\\n", i);
+        if (j == -1) j = res.length;
+        var line = res.substr(i, j-i);
+        if(line.startsWith("Title"))
         {
-            actualTitle = lines[i].replace( "Title               : ", "");
+            debug("line with title: " + line);            
+            actualTitle = line.replace( "Title               : ", "");
             break;
         }
+        i = j+1;
     }
-    if(actualTitle == null || actualTitle=="" )
+    debug("Detected inside title is: " + actualTitle);
+    if(actualTitle == null || actualTitle == "")
     {
         return false;
     }
-    console.log("inside title is: " + actualTitle);
     const lngDetector = new LanguageDetect();
     lngDetector.setLanguageType("iso2");
     lang = lngDetector.detect(actualTitle)
@@ -69,13 +71,13 @@ function IsValidTitle (path, title) {
     {
         return false;
     }
-    console.log("detect lang: " + lang);
+    debug("detect lang: " + lang);
     checker = checkWord(lang);
     var words = actualTitle.split(" ");    
     words.forEach(word => {
         if(checker.check(word) == true)
         {
-            console.log("detect word: " + word);
+            debug("detect word: " + word);
             return true;
         }
     });

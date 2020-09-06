@@ -26,7 +26,7 @@ RUN wget -nv -O- https://raw.githubusercontent.com/kovidgoyal/calibre/master/set
 # Install nodejs
 ENV USER nodejs
 #ENV NODE_VERSION 6.9.5
-ENV NODE_VERSION 12.15.0
+ENV NODE_VERSION 12.18.3
 
 RUN useradd --create-home --shell /bin/bash $USER
 
