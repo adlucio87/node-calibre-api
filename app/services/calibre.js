@@ -6,8 +6,9 @@ var exec = require('child_process').exec,
 
 function ebookConvert (path, pathTo, fsizemb, ext) {
     //se file size > di 24 allora faccio lo shrink delle immagini
+    //devo capire pure come farlo per i file pdf
     debug("file size is " + fsizemb + " mb");
-    if (fsizemb > 24 && (ext.toLowerCase().startsWith(".azw") || ext.toLowerCase() == ".epub") )
+    if (fsizemb > 24 && (ext.toString().toLowerCase().startsWith(".azw") || ext.toString().toLowerCase() == ".epub") )
     {
         var tempfile = pathTo.substr(0, pathTo.lastIndexOf(".")) + ext;
         debug("conversion with compression");
@@ -31,7 +32,7 @@ function changeTitleIfNotValid (path, title) {
     var res = executeCommand('ebook-meta ' + path);
     var actualTitle = "";
     var i = 0;
-    debug(res);
+    //debug(res);
     while (i < res.length)
     {
         var j = res.indexOf("\\n", i);
@@ -46,41 +47,43 @@ function changeTitleIfNotValid (path, title) {
         i = j+1;
     }
     debug("Detected inside title is: " + actualTitle);
-    if(actualTitle == null || actualTitle == "")
+    //TODO: aggiungere verifica di actual title contain in path
+    //|| actualTitle.endsWith(path.)
+    if(actualTitle == null || actualTitle == "" )
     {
-        changeTitle(path,title).then(function()
-        {
-            return true;
-        });
+        executeCommand('ebook-meta ' + path + ' --title "' + title + '"' );
+        return true;
     }
     const lngDetector = new LanguageDetect();
     lngDetector.setLanguageType("iso2");
     lang = lngDetector.detect(actualTitle)
     if( lang == null || lang[0] == "")
     {
-        changeTitle(path,title).then(function()
-        {
-            return true;
-        });
+        executeCommand('ebook-meta ' + path + ' --title "' + title + '"' );
+        return true;
     }
     debug("detect lang: " + lang);
     checker = checkWord(lang);
     var words = actualTitle.split(" ");
     var detected = false; 
-    words.forEach(word => {
-        if(checker.check(word) == true)
-        {
-            debug("detect word: " + word);
-            detected = true;
-            break;
-        }
-    });
+    try {
+        //TODO: verificare in quanto da errore
+        words.forEach(word => {
+            if(checker.check(word) == true)
+            {
+                debug("detect word: " + word);
+                detected = true;
+                throw BreakException;
+            }
+        });
+    } catch (e) {
+        if (e !== BreakException) throw e;
+    }
+
     if(detected==false)
     {
-        changeTitle(path,title).then(function()
-        {
-            return true;
-        });
+        executeCommand('ebook-meta ' + path + ' --title "' + title + '"' );
+        return true;
     }
     return false;
 }

@@ -86,11 +86,9 @@ function convert(req, res){
                 
                 //potrei cambiare il titolo con il file name se vuoto
                 //valutare se c'è una possibilità migliore
-                CalibreService.changeTitleIfNotValid(outFile, newFilename).then(function()
-                {
-                    debug('Can Download')
-                    res.download(outFile, newFilename+ '.' + toFormat);                        
-                });
+                CalibreService.changeTitleIfNotValid(outFile, newFilename);
+                debug('Can Download');
+                res.download(outFile, newFilename+ '.' + toFormat);
 
             }, function(err) {
                 res.status(500).send({error: 'Error while converting file', trace: err});
