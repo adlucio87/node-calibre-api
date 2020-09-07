@@ -12,6 +12,7 @@ function ebookConvert (path, pathTo, fsizemb, ext) {
     {
         var tempfile = pathTo.substr(0, pathTo.lastIndexOf(".")) + ext;
         debug("conversion with compression");
+        //TODO: verificare non funziona il then se non con una promise...
         executeCommand('ebook-polish --compress-images ' + path + ' ' + tempfile).then(function()
         {
             return executeCommand('ebook-convert ' + tempfile + ' ' + pathTo);
