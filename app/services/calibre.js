@@ -12,28 +12,25 @@ function ebookConvert (path, pathTo, fsizemb, ext) {
     {
         var tempfile = pathTo.substr(0, pathTo.lastIndexOf(".")) + ext;
         debug("conversion with compression");
-        //TODO: verificare non funziona il then se non con una promise...
-        executeCommand('ebook-polish --compress-images ' + path + ' ' + tempfile).then(function()
+
+        //TODO: then dose not work added promise returned, to be tested.
+        CompressImage(path, tempfile).then(function()
         {
             return executeCommand('ebook-convert ' + tempfile + ' ' + pathTo);
         }, function(err) {
-            return executeCommand('ebook-convert ' + path + ' ' + pathTo);
+            debug("Conversion compressed error");
         });
     }
-    else{
-        return executeCommand('ebook-convert ' + path + ' ' + pathTo);
-    }
+    return executeCommand('ebook-convert ' + path + ' ' + pathTo);
 }
 exports.ebookConvert = ebookConvert;
-
-
 
 function changeTitleIfNotValid (path, title) {
 
     var res = executeCommand('ebook-meta ' + path);
     var actualTitle = "";
     var i = 0;
-    //debug(res);
+    debug(res);
     while (i < res.length)
     {
         var j = res.indexOf("\\n", i);
@@ -48,52 +45,46 @@ function changeTitleIfNotValid (path, title) {
         i = j+1;
     }
     debug("Detected inside title is: " + actualTitle);
-    //TODO: aggiungere verifica di actual title contain in path
-    //|| actualTitle.endsWith(path.)
-    if(actualTitle == null || actualTitle == "" )
+    if(actualTitle == null || actualTitle == "" || path.includes(actualTitle) )
     {
-        executeCommand('ebook-meta ' + path + ' --title "' + title + '"' );
-        return true;
+        return executeCommand('ebook-meta ' + path + ' --title "' + title + '"' );
     }
+    return new Promise();
+    //potrebbe essere sufficente fermarmi qui per adesso faccio così poi vediamo..
+    //il codice sotto cerca di riconoscere la lingua e le parole
+    /*
     const lngDetector = new LanguageDetect();
     lngDetector.setLanguageType("iso2");
     lang = lngDetector.detect(actualTitle)
     if( lang == null || lang[0] == "")
     {
-        executeCommand('ebook-meta ' + path + ' --title "' + title + '"' );
-        return true;
+        return executeCommand('ebook-meta ' + path + ' --title "' + title + '"' );
     }
     debug("detect lang: " + lang);
     checker = checkWord(lang);
     var words = actualTitle.split(" ");
-    var detected = false; 
-    try {
-        //TODO: verificare in quanto da errore
-        words.forEach(word => {
-            if(checker.check(word) == true)
-            {
-                debug("detect word: " + word);
-                detected = true;
-                throw BreakException;
-            }
-        });
-    } catch (e) {
-        if (e !== BreakException) throw e;
-    }
-
-    if(detected==false)
-    {
-        executeCommand('ebook-meta ' + path + ' --title "' + title + '"' );
-        return true;
-    }
-    return false;
+    //TODO: to be tested
+    words.forEach(word => {
+        if(checker.check(word) == true)
+        {
+            debug("detect word: " + word);
+            return new Promise();
+        }
+    });
+    return executeCommand('ebook-meta ' + path + ' --title "' + title + '"' );
+    */
 }
 exports.changeTitleIfNotValid = changeTitleIfNotValid;
 
 
 //support function
 const changeTitle = function change (path, title) {
-    executeCommand('ebook-meta ' + path + ' --title "' + title + '"' );
+    return executeCommand('ebook-meta ' + path + ' --title "' + title + '"' );
+}
+
+const CompressImage = function Compress(path, tempfile)
+{
+    return executeCommand('ebook-polish --compress-images ' + path + ' ' + tempfile);
 }
 
 const executeCommand = function execute (command) {
