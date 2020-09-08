@@ -10,7 +10,7 @@ function ebookConvert (path, pathTo, fsizemb, ext) {
     debug("file size is " + fsizemb + " mb");
     if (fsizemb > 24 && (ext.toString().toLowerCase().startsWith(".azw") || ext.toString().toLowerCase() == ".epub") )
     {
-        var tempfile = pathTo.substr(0, pathTo.lastIndexOf(".")) + ext;
+        var tempfile = path.substr(0, path.lastIndexOf(".")) + "_tmp" + ext;
         debug("conversion with compression");
 
         //TODO: then dose not work added promise returned, to be tested.
@@ -30,7 +30,10 @@ function changeTitleIfNotValid (path, title) {
     var res = executeCommand('ebook-meta ' + path);
     var actualTitle = "";
     var i = 0;
-    debug(res);
+    res.then(function(value) {
+        debug('res value: ' + value);
+        debug('res value lenght: ' + res.length);
+    });
     while (i < res.length)
     {
         var j = res.indexOf("\\n", i);

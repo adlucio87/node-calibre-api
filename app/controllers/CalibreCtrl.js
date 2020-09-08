@@ -84,11 +84,12 @@ function convert(req, res){
             .then(function(){
                 debug('did it!, the epub exists!')
                 
-                //potrei cambiare il titolo con il file name se vuoto
-                //valutare se c'è una possibilità migliore
-                CalibreService.changeTitleIfNotValid(outFile, newFilename);
-                debug('Can Download');
-                res.download(outFile, newFilename+ '.' + toFormat);
+                //cambio il titolo se vuoto oppure con lo stesso nome del file
+                CalibreService.changeTitleIfNotValid(outFile, newFilename)
+                    .then(function(){
+                        debug('Can Download');
+                        res.download(outFile, newFilename+ '.' + toFormat);
+                    });
 
             }, function(err) {
                 res.status(500).send({error: 'Error while converting file', trace: err});
