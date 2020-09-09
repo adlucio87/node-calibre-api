@@ -8,8 +8,8 @@ var exec = require('child_process').exec,
 function ebookConvert (path, pathTo, fsizemb, ext) {
     //se file size > di 24 allora faccio lo shrink delle immagini
     //devo capire pure come farlo per i file pdf
-    debug("file size is " + fsizemb + " mb");
-    if (fsizemb > 24 && (ext.toString().toLowerCase().startsWith(".azw") || ext.toString().toLowerCase() == ".epub") )
+    debug("file size is " + fsizemb + " mb. ext:" + ext.toString().toLowerCase());
+    if (fsizemb > 24 && (ext.toString().toLowerCase().startsWith(".azw") || ext.toString().toLowerCase().startsWith(".epub") ))
     {
         debug("use compression mode");
         var tempfile = path.substr(0, path.lastIndexOf(".")) + "_tmp" + ext;
@@ -22,15 +22,17 @@ function ebookConvert (path, pathTo, fsizemb, ext) {
             debug("Conversion compressed error: " + err);
         });
     }
-    return executeCommand('ebook-convert ' + path + ' ' + pathTo);
+    else
+    {
+        return executeCommand('ebook-convert ' + path + ' ' + pathTo);
+    }
 }
 exports.ebookConvert = ebookConvert;
 
 function changeTitleIfNotValid (path, title) {
 
     var actualTitle = "";
-    executeCommand('ebook-meta ' + path)
-    .then(function(value) {
+    executeCommand('ebook-meta ' + path).then(function(value) {
         debug('res value: ' + value);
         let lines = eol.split(value)
         lines.forEach(function(line) {
@@ -48,9 +50,9 @@ function changeTitleIfNotValid (path, title) {
                     }
                 }
             }
-        });
+        });        
     });
-    return new Promise();
+    //return new Promise();
     //potrebbe essere sufficente fermarmi qui per adesso faccio così poi vediamo..
     //il codice sotto cerca di riconoscere la lingua e le parole
     /*
