@@ -1,7 +1,8 @@
 var exec = require('child_process').exec,
     debug = require('debug')('calibre-api:service'),
-    LanguageDetect = require('languagedetect'),
-    checkWord = require('check-word');
+    //LanguageDetect = require('languagedetect'),
+    //checkWord = require('check-word'),
+    eol = require("eol");
 
 
 function ebookConvert (path, pathTo, fsizemb, ext) {
@@ -29,24 +30,22 @@ function changeTitleIfNotValid (path, title) {
 
     var res = executeCommand('ebook-meta ' + path);
     var actualTitle = "";
-    var i = 0;
     res.then(function(value) {
         debug('res value: ' + value);
-        debug('res value lenght: ' + res.length);
+        let lines = eol.split(value)
+        lines.forEach(function(line) {
+            if(line.trimStart().toLowerCase().startsWith("title"))
+            {
+                debug("line with title: " + line);  
+                var lnpeace = line.split(":");
+                if(lnpeace[1] != null && lnpeace[1] != "")
+                {
+                    actualTitle = lnpeace[1].trimStart().trimEnd();
+                }
+            }
+        });
     });
-    while (i < res.length)
-    {
-        var j = res.indexOf("\\n", i);
-        if (j == -1) j = res.length;
-        var line = res.substr(i, j-i);
-        if(line.startsWith("Title"))
-        {
-            debug("line with title: " + line);            
-            actualTitle = line.replace( "Title               : ", "");
-            break;
-        }
-        i = j+1;
-    }
+    
     debug("Detected inside title is: " + actualTitle);
     if(actualTitle == null || actualTitle == "" || path.includes(actualTitle) )
     {
