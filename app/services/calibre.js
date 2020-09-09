@@ -11,15 +11,15 @@ function ebookConvert (path, pathTo, fsizemb, ext) {
     debug("file size is " + fsizemb + " mb");
     if (fsizemb > 24 && (ext.toString().toLowerCase().startsWith(".azw") || ext.toString().toLowerCase() == ".epub") )
     {
+        debug("use compression mode");
         var tempfile = path.substr(0, path.lastIndexOf(".")) + "_tmp" + ext;
-        debug("conversion with compression");
-
         //TODO: then dose not work added promise returned, to be tested.
         CompressImage(path, tempfile).then(function()
         {
+            debug("conversion with compression");
             return executeCommand('ebook-convert ' + tempfile + ' ' + pathTo);
         }, function(err) {
-            debug("Conversion compressed error");
+            debug("Conversion compressed error: " + err);
         });
     }
     return executeCommand('ebook-convert ' + path + ' ' + pathTo);
@@ -28,9 +28,9 @@ exports.ebookConvert = ebookConvert;
 
 function changeTitleIfNotValid (path, title) {
 
-    var res = executeCommand('ebook-meta ' + path);
     var actualTitle = "";
-    res.then(function(value) {
+    executeCommand('ebook-meta ' + path)
+    .then(function(value) {
         debug('res value: ' + value);
         let lines = eol.split(value)
         lines.forEach(function(line) {
@@ -41,16 +41,15 @@ function changeTitleIfNotValid (path, title) {
                 if(lnpeace[1] != null && lnpeace[1] != "")
                 {
                     actualTitle = lnpeace[1].trimStart().trimEnd();
+                    debug("Detected inside title is: " + actualTitle);
+                    if(actualTitle == null || actualTitle == "" || path.includes(actualTitle) )
+                    {
+                        return executeCommand('ebook-meta ' + path + ' --title "' + title + '"' );
+                    }
                 }
             }
         });
     });
-    
-    debug("Detected inside title is: " + actualTitle);
-    if(actualTitle == null || actualTitle == "" || path.includes(actualTitle) )
-    {
-        return executeCommand('ebook-meta ' + path + ' --title "' + title + '"' );
-    }
     return new Promise();
     //potrebbe essere sufficente fermarmi qui per adesso faccio così poi vediamo..
     //il codice sotto cerca di riconoscere la lingua e le parole
