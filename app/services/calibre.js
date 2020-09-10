@@ -50,7 +50,11 @@ function changeTitleIfNotValid (path, title) {
                     }
                 }
             }
-        });        
+        });
+        return new Promise(() => {})  
+    }, function(err) {
+        debug("error: " + err);  
+        return new Promise(() => {})
     });
     //return new Promise();
     //potrebbe essere sufficente fermarmi qui per adesso faccio così poi vediamo..
