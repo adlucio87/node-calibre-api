@@ -29,34 +29,67 @@ function ebookConvert (path, pathTo, fsizemb, ext) {
 }
 exports.ebookConvert = ebookConvert;
 
-function changeTitleIfNotValid (path, title) {
 
-    var actualTitle = "";
-    executeCommand('ebook-meta ' + path).then(function(value) {
-        debug('res value: ' + value);
-        let lines = eol.split(value)
+function checkTitle (meta, title) {
+    return new Promise(function(resolve, reject) {
+
+        var actualTitle = "";
+        let lines = eol.split(meta);
         lines.forEach(function(line) {
-            if(line.trimStart().toLowerCase().startsWith("title"))
+            if(line.replace(/\s/g, "").toLowerCase().startsWith("title:"))
             {
                 debug("line with title: " + line);  
                 var lnpeace = line.split(":");
-                if(lnpeace[1] != null && lnpeace[1] != "")
+                actualTitle = lnpeace[1].trimStart().trimEnd();
+                debug("Detected inside title is: " + actualTitle);
+                if(actualTitle == null || actualTitle == "" || path.includes(actualTitle) )
                 {
-                    actualTitle = lnpeace[1].trimStart().trimEnd();
-                    debug("Detected inside title is: " + actualTitle);
-                    if(actualTitle == null || actualTitle == "" || path.includes(actualTitle) )
-                    {
-                        return executeCommand('ebook-meta ' + path + ' --title "' + title + '"' );
-                    }
+                    var command = 'ebook-meta ' + path + ' --title "' + title + '"' 
+                    debug("will execute", command);
+                    var child = exec(command, function (error, stdout, stderr) {
+                        if (error !== null) {
+                            debug('Error after command executed:');
+                            debug(error);
+                            debug(stderr);
+                            debug(stdout);
+                            reject(stderr);
+                        }
+                        else {
+                            resolve(stdout);
+                        }
+                    });
+                }               
+            }            
+        });        
+        resolve("OK");
+    });
+}
+exports.checkTitle = checkTitle;
+
+
+
+
+function changeTitleIfNotValid (meta, title) {
+    var actualTitle = "";
+    let lines = eol.split(meta);
+    lines.forEach(function(line) {
+        if(line.trimStart().toLowerCase().startsWith("title"))
+        {
+            debug("line with title: " + line);  
+            var lnpeace = line.split(":");
+            if(lnpeace[1] != null && lnpeace[1] != "")
+            {
+                actualTitle = lnpeace[1].trimStart().trimEnd();
+                debug("Detected inside title is: " + actualTitle);
+                if(actualTitle == null || actualTitle == "" || path.includes(actualTitle) )
+                {
+                    return executeCommand('ebook-meta ' + path + ' --title "' + title + '"' );
                 }
             }
-        });
-        return new Promise(() => {})  
-    }, function(err) {
-        debug("error: " + err);  
-        return new Promise(() => {})
+        }
     });
-    //return new Promise();
+    return new Promise(() => {});
+
     //potrebbe essere sufficente fermarmi qui per adesso faccio così poi vediamo..
     //il codice sotto cerca di riconoscere la lingua e le parole
     /*
@@ -84,19 +117,32 @@ function changeTitleIfNotValid (path, title) {
 exports.changeTitleIfNotValid = changeTitleIfNotValid;
 
 
+
+
+function getBookMeta(path, tempfile)
+{
+    return executeCommand('ebook-meta ' + path)
+}
+exports.getBookMeta = getBookMeta;
+
 //support function
-const changeTitle = function change (path, title) {
+function changeTitle (path, title) {
     return executeCommand('ebook-meta ' + path + ' --title "' + title + '"' );
 }
+exports.changeTitle = changeTitle;
+
 
 const CompressImage = function Compress(path, tempfile)
 {
     return executeCommand('ebook-polish --compress-images ' + path + ' ' + tempfile);
 }
 
-const executeCommand = function execute (command) {
+function executeCommand (command) {
     return new Promise(function(resolve, reject) {
-        debug("will execute", command);
+        debug("will execute", command);        
+        //for test
+        //resolve("ok");
+
         var child = exec(command, function (error, stdout, stderr) {
             if (error !== null) {
                 debug('Error after command executed:');
@@ -109,5 +155,7 @@ const executeCommand = function execute (command) {
                 resolve(stdout);
             }
         });
+        
     });
 }
+

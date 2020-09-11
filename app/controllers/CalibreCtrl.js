@@ -5,7 +5,8 @@ var multiparty = require('multiparty'),
     CalibreService = require('../services/calibre'),
     debug = require('debug')('calibre-api:controller'),
     compare = require('tsscmp'),
-    mime = require('mime-types');
+    mime = require('mime-types'),
+    eol = require("eol");
 
     var conversionTimeout = 10 * 60 * 1000;
 
@@ -82,20 +83,24 @@ function convert(req, res){
         var fsizemb = fileToConvert.size / 1000000.0;
         CalibreService.ebookConvert(fileToConvert.path, outFile, fsizemb, ext)
             .then(function(){
-               debug('did it!, the epub exists!')
+            debug('did it!, the epub exists!');               
+
+            CalibreService.getBookMeta(path)
+                .then(function(meta){
                 
-                //cambio il titolo se vuoto oppure con lo stesso nome del file
-               CalibreService.changeTitleIfNotValid(outFile, newFilename)
-                .then(function(){
-                    debug('Can Download');
-                    res.download(outFile, newFilename+ '.' + toFormat);
+                CalibreService.checkTitle(meta, newFilename).then(function(){  
+                   res.download(outFile, newFilename+ '.' + toFormat);
                 }, function(err) {
-                    res.status(500).send({error: 'Error while converting file', trace: err});
+                    res.status(500).send({error: 'Error retriving meta', trace: err});
                 });
-            
+
             }, function(err) {
-                res.status(500).send({error: 'Error while converting file', trace: err});
+                res.status(500).send({error: 'Error retriving meta', trace: err});
             });
+
+        }, function(err) {
+            res.status(500).send({error: 'Error while converting file', trace: err});
+        });
    });
 
 }
