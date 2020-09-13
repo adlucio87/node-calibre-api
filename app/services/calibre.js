@@ -3,9 +3,10 @@ var exec = require('child_process').exec,
     //LanguageDetect = require('languagedetect'),
     //checkWord = require('check-word'),
     eol = require("eol");
+    awaitExec = require('await-exec')
 
 
-function ebookConvert (path, pathTo, fsizemb, ext) {
+async function ebookConvert (path, pathTo, fsizemb, ext) {
     //se file size > di 24 allora faccio lo shrink delle immagini
     //devo capire pure come farlo per i file pdf
     debug("file size is " + fsizemb + " mb. ext:" + ext.toString().toLowerCase());
@@ -13,14 +14,11 @@ function ebookConvert (path, pathTo, fsizemb, ext) {
     {
         debug("use compression mode");
         var tempfile = path.substr(0, path.lastIndexOf(".")) + "_tmp" + ext;
-        //TODO: then dose not work added promise returned, to be tested.
-        CompressImage(path, tempfile).then(function()
-        {
-            debug("conversion with compression");
-            return executeCommand('ebook-convert ' + tempfile + ' ' + pathTo);
-        }, function(err) {
-            debug("Conversion compressed error: " + err);
-        });
+        
+        await CompressImage(path, tempfile);
+        
+        
+        return executeCommand('ebook-convert ' + tempfile + ' ' + pathTo);
     }
     else
     {
@@ -30,43 +28,48 @@ function ebookConvert (path, pathTo, fsizemb, ext) {
 exports.ebookConvert = ebookConvert;
 
 
-function checkTitle (meta, title) {
-    return new Promise(function(resolve, reject) {
+async function asyncForEach(array, callback) {
+    for (let index = 0; index < array.length; index++) {
+      await callback(array[index], index, array);
+    }
+}
 
+async function checkAndRenameTitle (meta, path, title) {
+    return new Promise(async function(resolve, reject) {
         var actualTitle = "";
+        var exit = false;
         let lines = eol.split(meta);
+
+        console.log("start while");
         lines.forEach(function(line) {
             if(line.replace(/\s/g, "").toLowerCase().startsWith("title:"))
             {
-                debug("line with title: " + line);  
                 var lnpeace = line.split(":");
                 actualTitle = lnpeace[1].trimStart().trimEnd();
                 debug("Detected inside title is: " + actualTitle);
+                console.log("Detected inside title is: " + actualTitle);
                 if(actualTitle == null || actualTitle == "" || path.includes(actualTitle) )
                 {
                     var command = 'ebook-meta ' + path + ' --title "' + title + '"' 
                     debug("will execute", command);
-                    var child = exec(command, function (error, stdout, stderr) {
-                        if (error !== null) {
-                            debug('Error after command executed:');
-                            debug(error);
-                            debug(stderr);
-                            debug(stdout);
-                            reject(stderr);
-                        }
-                        else {
-                            resolve(stdout);
-                        }
+                    console.log("will execute", command);
+                    executeCommand(command).then( function(){
+                        resolve("OK");    
                     });
-                }               
-            }            
-        });        
-        resolve("OK");
+                }
+                exit = true;
+            }
+            
+            if(exit)
+            {
+                resolve("End no rename");
+            }
+        });
+        console.log("end while");
+        debug('Exit no rename');
     });
 }
-exports.checkTitle = checkTitle;
-
-
+exports.checkAndRenameTitle = checkAndRenameTitle;
 
 
 function changeTitleIfNotValid (meta, title) {
@@ -132,7 +135,7 @@ function changeTitle (path, title) {
 exports.changeTitle = changeTitle;
 
 
-const CompressImage = function Compress(path, tempfile)
+const CompressImage = async function Compress(path, tempfile)
 {
     return executeCommand('ebook-polish --compress-images ' + path + ' ' + tempfile);
 }
@@ -141,21 +144,22 @@ function executeCommand (command) {
     return new Promise(function(resolve, reject) {
         debug("will execute", command);        
         //for test
+        //setTimeout(function(){  }, 3000);
         //resolve("ok");
-
         var child = exec(command, function (error, stdout, stderr) {
             if (error !== null) {
                 debug('Error after command executed:');
+                console.log("err");
                 debug(error);
                 debug(stderr);
                 debug(stdout);
                 reject(stderr);
             }
             else {
+                console.log("command execution finish");
                 resolve(stdout);
             }
         });
         
     });
 }
-

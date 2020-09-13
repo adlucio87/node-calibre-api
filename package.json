@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "author": "lucio",
   "dependencies": {
+    "await-exec": "^0.1.2",
     "body-parser": "^1.19.0",
     "check-word": "1.1.0",
     "debug": "^2.6.9",
@@ -10,7 +11,7 @@
     "errorhandler": "^1.5.1",
     "express": "^4.17.1",
     "languagedetect": "^2.0.0",
-    "mime-types": "^2.1.26",
+    "mime-types": "^2.1.27",
     "multiparty": "^4.2.2",
     "require-dir": "^0.3.2",
     "tsscmp": "^1.0.6"

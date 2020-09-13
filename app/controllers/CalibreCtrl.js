@@ -52,7 +52,7 @@ module.exports.ebookConvertBasicAuth = function (req, res) {
 };
 
 
-function convert(req, res){
+function convert(req, res) {
     res.setTimeout(conversionTimeout);
     var form = new multiparty.Form();
     form.parse(req, function(err, fields, files) {
@@ -82,18 +82,24 @@ function convert(req, res){
         outFile = fileToConvert.path.substring(0, fileToConvert.path.length - ext.length) + '.' + toFormat;
         var fsizemb = fileToConvert.size / 1000000.0;
         CalibreService.ebookConvert(fileToConvert.path, outFile, fsizemb, ext)
-            .then(function(){
+            .then( function(){
             debug('did it!, the epub exists!');               
 
-            CalibreService.getBookMeta(path)
-                .then(function(meta){
-                
-                CalibreService.checkTitle(meta, newFilename).then(function(){  
-                   res.download(outFile, newFilename+ '.' + toFormat);
-                }, function(err) {
-                    res.status(500).send({error: 'Error retriving meta', trace: err});
-                });
+            CalibreService.getBookMeta(outFile)
+                .then(async function(meta){
+                if(meta.count == 0)
+                {
+                    res.download(outFile, newFilename+ '.' + toFormat);
+                }
 
+                await CalibreService.checkAndRenameTitle(meta, outFile, newFilename)
+                .then( function(){
+                    console.log("download!");
+
+                    debug('download!');               
+                    res.download(outFile, newFilename+ '.' + toFormat);    
+                });
+            
             }, function(err) {
                 res.status(500).send({error: 'Error retriving meta', trace: err});
             });
