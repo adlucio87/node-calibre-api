@@ -92,7 +92,7 @@ function convert(req, res) {
                     res.download(outFile, newFilename+ '.' + toFormat);
                 }
 
-                await CalibreService.checkAndRenameTitle(meta, outFile, newFilename)
+                CalibreService.checkAndRenameTitle(meta, outFile, newFilename)
                 .then( function(){
                     console.log("download!");
 

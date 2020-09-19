@@ -34,39 +34,40 @@ async function asyncForEach(array, callback) {
     }
 }
 
-async function checkAndRenameTitle (meta, path, title) {
-    return new Promise(async function(resolve, reject) {
+function checkAndRenameTitle (meta, path, title) {
+    return new Promise(function(resolve, reject) {
         var actualTitle = "";
-        var exit = false;
+        var exit = true;
         let lines = eol.split(meta);
 
-        console.log("start while");
         lines.forEach(function(line) {
             if(line.replace(/\s/g, "").toLowerCase().startsWith("title:"))
             {
                 var lnpeace = line.split(":");
                 actualTitle = lnpeace[1].trimStart().trimEnd();
                 debug("Detected inside title is: " + actualTitle);
-                console.log("Detected inside title is: " + actualTitle);
-                if(actualTitle == null || actualTitle == "" || path.includes(actualTitle) )
+                debug("Filename: " + path);
+                if(actualTitle == null || actualTitle == "" || path.includes(actualTitle.replace(/\s/g, "_")) )
                 {
-                    var command = 'ebook-meta ' + path + ' --title "' + title + '"' 
-                    debug("will execute", command);
-                    console.log("will execute", command);
-                    executeCommand(command).then( function(){
-                        resolve("OK");    
-                    });
+                    exit = false;
                 }
-                exit = true;
-            }
-            
-            if(exit)
-            {
-                resolve("End no rename");
             }
         });
-        console.log("end while");
-        debug('Exit no rename');
+        if(exit)
+        {
+            debug("Title present can exit");
+            resolve("Title present can exit");
+        }
+        else
+        {
+            var command = 'ebook-meta ' + path + ' --title "' + title + '"' 
+            executeCommand(command)
+                .then( function(){
+                    resolve("OK");
+                }, function(err) {
+                    reject(err);                        
+                });
+        }
     });
 }
 exports.checkAndRenameTitle = checkAndRenameTitle;
@@ -149,14 +150,14 @@ function executeCommand (command) {
         var child = exec(command, function (error, stdout, stderr) {
             if (error !== null) {
                 debug('Error after command executed:');
-                console.log("err");
+                debug("err");
                 debug(error);
                 debug(stderr);
                 debug(stdout);
                 reject(stderr);
             }
             else {
-                console.log("command execution finish");
+                debug("command execution finish");
                 resolve(stdout);
             }
         });
